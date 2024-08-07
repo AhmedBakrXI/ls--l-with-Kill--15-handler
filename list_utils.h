@@ -21,7 +21,7 @@ void printTime(struct tm *time, const struct stat *status);
 
 void printFileDetails(const char *filename, const struct stat *status);
 
-void processDirectory(DIR **dir, struct dirent **entry, struct stat *fileStatus, char **directory);
+void processDirectory(DIR **dir, char **directoryName);
 
 void list(char ***directories, const int argc);
 
