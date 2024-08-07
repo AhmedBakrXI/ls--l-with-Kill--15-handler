@@ -68,30 +68,30 @@ void printFileDetails(const char *filename, const struct stat *status) {
 }
 
 // Process each directory then prints the details of each file or folder in the directory
-void processDirectory(DIR **dir, struct dirent **entry, struct stat *fileStatus, char **directory) {
-    while (((*entry) = readdir(*dir)) != NULL) {
+void processDirectory(DIR **dir, char **directoryName) {
+    struct dirent *entry;
+    struct stat fileStatus;
+
+    while ((entry = readdir(*dir)) != NULL) {
         char path[PATH_MAX];
-        if (strcmp((*entry)->d_name, ".") == 0 || strcmp((*entry)->d_name, "..") == 0) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
         }
 
-        snprintf(path, sizeof(path), "%s/%s", *directory, (*entry)->d_name);
+        snprintf(path, sizeof(path), "%s/%s", *directoryName, entry->d_name);
 
-        if (stat(path, fileStatus) == -1) {
+        if (stat(path, &fileStatus) == -1) {
             perror("stat");
             continue;
         }
 
-        printFileDetails((*entry)->d_name, fileStatus);
+        printFileDetails(entry->d_name, &fileStatus);
     }
     printf("\n");
 }
 
 // Lists all directories and files in the directories passed as arguments
 void list(char ***directories, const int argc) {
-    struct dirent *entry;
-    struct stat fileStatus;
-
     int numOfDirectories = (argc < 2) ? 1 : argc - 1;
 
     for (int i = 0; i < numOfDirectories; i++) {
@@ -101,11 +101,12 @@ void list(char ***directories, const int argc) {
             continue;
         }
 
+        // Print each directory name before listing if there are multiple directories
         if (numOfDirectories > 1) {
             printf("%s:\n", (*directories)[i]);
         }
 
-        processDirectory(&dir, &entry, &fileStatus, &(*directories)[i]);
+        processDirectory(&dir, &(*directories)[i]);
         closedir(dir);
     }
 }
